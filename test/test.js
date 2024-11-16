@@ -65,160 +65,160 @@ describe("AutoCompoundingVault", function () {
     });
   });
 
-  // describe("Deposits", function () {
-  //   const depositAmount = ethers.utils.parseEther("100");
+  describe("Deposits", function () {
+    const depositAmount = ethers.utils.parseEther("100");
 
-  //   it("Should accept deposits and mint correct shares", async function () {
-  //     const preBal = await islandToken.balanceOf(alice.address);
-  //     await vault.connect(alice).deposit(depositAmount, alice.address);
+    it("Should accept deposits and mint correct shares", async function () {
+      const preBal = await islandToken.balanceOf(alice.address);
+      await vault.connect(alice).deposit(depositAmount, alice.address);
       
-  //     expect(await vault.balanceOf(alice.address)).to.equal(depositAmount);
-  //     expect(await islandToken.balanceOf(alice.address)).to.equal(preBal.sub(depositAmount));
-  //   });
+      expect(await vault.balanceOf(alice.address)).to.equal(depositAmount);
+      expect(await islandToken.balanceOf(alice.address)).to.equal(preBal.sub(depositAmount));
+    });
 
-  //   it("Should stake LP tokens in Beradrome after deposit", async function () {
-  //     await vault.connect(alice).deposit(depositAmount, alice.address);
+    it("Should stake LP tokens in Beradrome after deposit", async function () {
+      await vault.connect(alice).deposit(depositAmount, alice.address);
       
-  //     // Verify plugin balance increased
-  //     const pluginBalance = await plugin.balanceOf(vault.address);
-  //     expect(pluginBalance).to.be.gt(0);
-  //   });
+      // Verify plugin balance increased
+      const pluginBalance = await plugin.balanceOf(vault.address);
+      expect(pluginBalance).to.be.gt(0);
+    });
 
-  //   it("Should fail deposit when paused", async function () {
-  //     await vault.pause();
-  //     await expect(
-  //       vault.connect(alice).deposit(depositAmount, alice.address)
-  //     ).to.be.revertedWith("Pausable: paused");
-  //   });
+    it("Should fail deposit when paused", async function () {
+      await vault.pause();
+      await expect(
+        vault.connect(alice).deposit(depositAmount, alice.address)
+      ).to.be.revertedWith("Pausable: paused");
+    });
 
-  //   it("Should handle multiple deposits from different users", async function () {
-  //     await vault.connect(alice).deposit(depositAmount, alice.address);
-  //     await vault.connect(bob).deposit(depositAmount.mul(2), bob.address);
+    it("Should handle multiple deposits from different users", async function () {
+      await vault.connect(alice).deposit(depositAmount, alice.address);
+      await vault.connect(bob).deposit(depositAmount.mul(2), bob.address);
       
-  //     expect(await vault.balanceOf(alice.address)).to.equal(depositAmount);
-  //     expect(await vault.balanceOf(bob.address)).to.equal(depositAmount.mul(2));
-  //   });
-  // });
+      expect(await vault.balanceOf(alice.address)).to.equal(depositAmount);
+      expect(await vault.balanceOf(bob.address)).to.equal(depositAmount.mul(2));
+    });
+  });
 
-  // describe("Withdrawals", function () {
-  //   const depositAmount = ethers.utils.parseEther("100");
+  describe("Withdrawals", function () {
+    const depositAmount = ethers.utils.parseEther("100");
     
-  //   beforeEach(async function () {
-  //     await vault.connect(alice).deposit(depositAmount, alice.address);
-  //   });
+    beforeEach(async function () {
+      await vault.connect(alice).deposit(depositAmount, alice.address);
+    });
 
-  //   it("Should allow full withdrawal", async function () {
-  //     const preBalance = await islandToken.balanceOf(alice.address);
-  //     await vault.connect(alice).withdraw(depositAmount, alice.address, alice.address);
+    it("Should allow full withdrawal", async function () {
+      const preBalance = await islandToken.balanceOf(alice.address);
+      await vault.connect(alice).withdraw(depositAmount, alice.address, alice.address);
       
-  //     expect(await vault.balanceOf(alice.address)).to.equal(0);
-  //     expect(await islandToken.balanceOf(alice.address)).to.equal(preBalance.add(depositAmount));
-  //   });
+      expect(await vault.balanceOf(alice.address)).to.equal(0);
+      expect(await islandToken.balanceOf(alice.address)).to.equal(preBalance.add(depositAmount));
+    });
 
-  //   it("Should allow partial withdrawal", async function () {
-  //     const withdrawAmount = depositAmount.div(2);
-  //     await vault.connect(alice).withdraw(withdrawAmount, alice.address, alice.address);
+    it("Should allow partial withdrawal", async function () {
+      const withdrawAmount = depositAmount.div(2);
+      await vault.connect(alice).withdraw(withdrawAmount, alice.address, alice.address);
       
-  //     expect(await vault.balanceOf(alice.address)).to.equal(withdrawAmount);
-  //   });
+      expect(await vault.balanceOf(alice.address)).to.equal(withdrawAmount);
+    });
 
-  //   it("Should fail withdrawal when paused", async function () {
-  //     await vault.pause();
-  //     await expect(
-  //       vault.connect(alice).withdraw(depositAmount, alice.address, alice.address)
-  //     ).to.be.revertedWith("Pausable: paused");
-  //   });
-  // });
+    it("Should fail withdrawal when paused", async function () {
+      await vault.pause();
+      await expect(
+        vault.connect(alice).withdraw(depositAmount, alice.address, alice.address)
+      ).to.be.revertedWith("Pausable: paused");
+    });
+  });
 
-  // describe("Harvesting", function () {
-  //   const depositAmount = ethers.utils.parseEther("100");
+  describe("Harvesting", function () {
+    const depositAmount = ethers.utils.parseEther("100");
 
-  //   beforeEach(async function () {
-  //     await vault.connect(alice).deposit(depositAmount, alice.address);
-  //   });
+    beforeEach(async function () {
+      await vault.connect(alice).deposit(depositAmount, alice.address);
+    });
 
-  //   it("Should harvest rewards and compound", async function () {
-  //     // Move forward in time to accumulate rewards
-  //     await time.increase(86400);
+    it("Should harvest rewards and compound", async function () {
+      // Move forward in time to accumulate rewards
+      await time.increase(86400);
 
-  //     const preBalance = await islandToken.balanceOf(vault.address);
-  //     await vault.harvest();
-  //     const postBalance = await islandToken.balanceOf(vault.address);
+      const preBalance = await islandToken.balanceOf(vault.address);
+      await vault.harvest();
+      const postBalance = await islandToken.balanceOf(vault.address);
 
-  //     expect(postBalance).to.be.gt(preBalance);
-  //   });
+      expect(postBalance).to.be.gt(preBalance);
+    });
 
-  //   it("Should fail harvesting before delay period", async function () {
-  //     await expect(vault.harvest()).to.be.revertedWith("Too soon to harvest");
-  //   });
+    it("Should fail harvesting before delay period", async function () {
+      await expect(vault.harvest()).to.be.revertedWith("Too soon to harvest");
+    });
 
-  //   it("Should emit Harvested event with correct values", async function () {
-  //     await time.increase(86400);
+    it("Should emit Harvested event with correct values", async function () {
+      await time.increase(86400);
       
-  //     await expect(vault.harvest())
-  //       .to.emit(vault, "Harvested")
-  //       .withArgs(expect.any(Number), expect.any(Number));
-  //   });
-  // });
+      await expect(vault.harvest())
+        .to.emit(vault, "Harvested")
+        .withArgs(expect.any(Number), expect.any(Number));
+    });
+  });
 
-  // describe("Admin Functions", function () {
-  //   it("Should allow owner to set harvest delay", async function () {
-  //     const newDelay = 43200; // 12 hours
-  //     await vault.setHarvestDelay(newDelay);
-  //     expect(await vault.harvestDelay()).to.equal(newDelay);
-  //   });
+  describe("Admin Functions", function () {
+    it("Should allow owner to set harvest delay", async function () {
+      const newDelay = 43200; // 12 hours
+      await vault.setHarvestDelay(newDelay);
+      expect(await vault.harvestDelay()).to.equal(newDelay);
+    });
 
-  //   it("Should allow owner to set slippage tolerance", async function () {
-  //     const newTolerance = 300; // 3%
-  //     await vault.setSlippageTolerance(newTolerance);
-  //     expect(await vault.slippageTolerance()).to.equal(newTolerance);
-  //   });
+    it("Should allow owner to set slippage tolerance", async function () {
+      const newTolerance = 300; // 3%
+      await vault.setSlippageTolerance(newTolerance);
+      expect(await vault.slippageTolerance()).to.equal(newTolerance);
+    });
 
-  //   it("Should fail when non-owner tries to set parameters", async function () {
-  //     await expect(
-  //       vault.connect(alice).setHarvestDelay(43200)
-  //     ).to.be.revertedWith("Ownable: caller is not the owner");
+    it("Should fail when non-owner tries to set parameters", async function () {
+      await expect(
+        vault.connect(alice).setHarvestDelay(43200)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
       
-  //     await expect(
-  //       vault.connect(alice).setSlippageTolerance(300)
-  //     ).to.be.revertedWith("Ownable: caller is not the owner");
-  //   });
+      await expect(
+        vault.connect(alice).setSlippageTolerance(300)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+    });
 
-  //   it("Should allow owner to pause/unpause", async function () {
-  //     await vault.pause();
-  //     expect(await vault.paused()).to.be.true;
+    it("Should allow owner to pause/unpause", async function () {
+      await vault.pause();
+      expect(await vault.paused()).to.be.true;
       
-  //     await vault.unpause();
-  //     expect(await vault.paused()).to.be.false;
-  //   });
+      await vault.unpause();
+      expect(await vault.paused()).to.be.false;
+    });
 
-  //   it("Should allow emergency token rescue", async function () {
-  //     const amount = ethers.utils.parseEther("1");
-  //     await honeyToken.transfer(vault.address, amount);
+    it("Should allow emergency token rescue", async function () {
+      const amount = ethers.utils.parseEther("1");
+      await honeyToken.transfer(vault.address, amount);
       
-  //     await vault.rescueTokens(HONEY_TOKEN, amount);
-  //     expect(await honeyToken.balanceOf(owner.address)).to.equal(amount);
-  //   });
-  // });
+      await vault.rescueTokens(HONEY_TOKEN, amount);
+      expect(await honeyToken.balanceOf(owner.address)).to.equal(amount);
+    });
+  });
 
-  // describe("Edge Cases", function () {
-  //   it("Should handle zero deposits", async function () {
-  //     await expect(
-  //       vault.connect(alice).deposit(0, alice.address)
-  //     ).to.be.revertedWith("Zero amount");
-  //   });
+  describe("Edge Cases", function () {
+    it("Should handle zero deposits", async function () {
+      await expect(
+        vault.connect(alice).deposit(0, alice.address)
+      ).to.be.revertedWith("Zero amount");
+    });
 
-  //   it("Should handle max uint256 approvals", async function () {
-  //     await islandToken.connect(alice).approve(vault.address, ethers.constants.MaxUint256);
-  //     const depositAmount = ethers.utils.parseEther("100");
-  //     await vault.connect(alice).deposit(depositAmount, alice.address);
-  //     expect(await vault.balanceOf(alice.address)).to.equal(depositAmount);
-  //   });
+    it("Should handle max uint256 approvals", async function () {
+      await islandToken.connect(alice).approve(vault.address, ethers.constants.MaxUint256);
+      const depositAmount = ethers.utils.parseEther("100");
+      await vault.connect(alice).deposit(depositAmount, alice.address);
+      expect(await vault.balanceOf(alice.address)).to.equal(depositAmount);
+    });
 
-  //   it("Should prevent harvesting with no rewards", async function () {
-  //     // Move time forward but with no deposits
-  //     await time.increase(86400);
-  //     await expect(vault.harvest()).to.be.revertedWith("No rewards to harvest");
-  //   });
-  // });
+    it("Should prevent harvesting with no rewards", async function () {
+      // Move time forward but with no deposits
+      await time.increase(86400);
+      await expect(vault.harvest()).to.be.revertedWith("No rewards to harvest");
+    });
+  });
 });
