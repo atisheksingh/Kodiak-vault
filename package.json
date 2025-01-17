@@ -16,6 +16,19 @@
     "typechain": "^8.3.2"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.1.0"
+    "@openzeppelin/contracts": "^5.1.0",
+    "dotenv": "^16.4.7",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@thirdweb-dev/contracts": "^3",
+    "@thirdweb-dev/sdk": "^3.10.14",
+    "@uniswap/v3-core": "github:uniswap/v3-core",
+    "@uniswap/v3-periphery": "github:uniswap/v3-periphery",
+    "ethers": "^5.7.2",
+    "glob": "^7.2.0",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.3.10",
+    "uniswap-v3-periphery-0.8": "^1.0.0"
   }
 }
