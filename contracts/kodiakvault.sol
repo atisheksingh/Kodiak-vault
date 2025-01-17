@@ -9,6 +9,7 @@ import "hardhat/console.sol";
 
 contract AutoCompoundingVault  {
 
+    // static addresses
     address public LBGTTokenAddress = 0x32Cf940DB5d7ea3e95e799A805B1471341241264;
     address public WBERATokenAddress = 0x7507c1dc16935B82698e4C63f2746A2fCf994dF8;
     address public IBGTTokenAddress  = 0x46eFC86F0D7455F135CC9df501673739d513E982;
@@ -16,14 +17,19 @@ contract AutoCompoundingVault  {
     address public KodiakSwapV3 = 0x66E8F0Cf851cE9be42a2f133a8851Bc6b70B9EBd;
     address public Kodiak_RouterV3= 0x4d41822c1804ffF5c038E4905cfd1044121e0E85;
     address public BurbearRouterAddress = 0xFDb2925aE2d3E2eacFE927611305e5e56AA5f832;
+    address public InfraredVault = 0x763F65E5F02371aD6C24bD60BCCB0b14E160d49b;
     bytes32 LbgtwberaId = 0x6acbbedecd914de8295428b4ee51626a1908bb12000000000000000000000010;
 
+    // interafaces 
     IERC20 public LBGTtoken = IERC20(LBGTTokenAddress);
     IERC20 public WBERAtoken = IERC20(WBERATokenAddress);
     IERC20 public IBGTtoken = IERC20(IBGTTokenAddress);
-    IKodiakVaultV1 public Lpvault = IKodiakVaultV1(LPvaultTokenAddress);
+
+    IERC20 public Lpvault = IERC20(LPvaultTokenAddress);
+
     IRouter public BurbearRouter = IRouter(BurbearRouterAddress);
-    // ISwapRouter public KodiakRouter = ISwapRouter(Kodiak_RouterV3);
+    IStaking public StakeFarm = IStaking(InfraredVault);
+    
     
     function DepositLBGTtoken(uint256 _amount) public {
         // please provide approval for the contract to spend the LBGT token
@@ -40,7 +46,7 @@ contract AutoCompoundingVault  {
         uint deadline = block.timestamp + 1000;
 
         IRouter.SingleSwap memory singleSwap;
-        singleSwap.poolId = LbgtwberaId; //??
+        singleSwap.poolId = LbgtwberaId; 
         singleSwap.kind = IRouter.SwapKind.GIVEN_IN;
         singleSwap.assetIn = IAsset(address(LBGTtoken));
         singleSwap.assetOut = IAsset(address(WBERAtoken));
@@ -61,11 +67,14 @@ contract AutoCompoundingVault  {
             0,
             deadline
         );
-
-        uint wberaBal = WBERAtoken.balanceOf(address(this));
-        console.log("contract WBERA balance after swap", wberaBal);
-       return wberaBal;
+        console.log("WBERA bought", amountOut);
+       return amountOut;
     }   
+
+    function selltokenForLBGT() public // ToDO add the function to sell token for LBGT
+    {
+        // sell token for LBGT
+    }
 
     function buyIBGTfromWBERAkodiak() public returns (uint) {
         uint WBERAtokenBal = WBERAtoken.balanceOf(address(this))/2; // using half of the WBERA to buy IBGT
@@ -88,11 +97,9 @@ contract AutoCompoundingVault  {
             sqrtPriceLimitX96: 0
         });
         console.log("Buying IBGT from WBERA");
-        // change to v3 pool 
-        // hope this do the swap for us 
        uint amountOut = ISwapRouter(KodiakSwapV3).exactInputSingle(swapParams);
        // getting the amount of LBGT received
-        console.log("IBGT bought", amountOut);
+       console.log("IBGT bought", amountOut);
        return amountOut;
      
     }
@@ -104,10 +111,10 @@ contract AutoCompoundingVault  {
         uint amountBDesired = WBERAtoken.balanceOf(address(this));
         console.log(amountADesired, "IBGT balance");
         console.log(amountBDesired, "WBERA balance");
-
+        //  tokenA and tokenB minimum amounts
         uint amountAMin = amountADesired / 2;
         uint amountBMin = amountBDesired / 2;
-
+        //approval
         IBGTtoken.approve(Kodiak_RouterV3, amountADesired);
         WBERAtoken.approve(Kodiak_RouterV3, amountBDesired);
 
@@ -122,14 +129,57 @@ contract AutoCompoundingVault  {
 
     }
 
+    function withdrawLiquidityv3pool() public {
+        IKodiakVaultV1 lpvault = IKodiakVaultV1(LPvaultTokenAddress);
+
+        uint liquidity = lpvault.balanceOf(address(this));
+        
+        Lpvault.approve(Kodiak_RouterV3, liquidity);
+        
+        console.log("Liquidity balance", liquidity);
+       
+        IKodiakV1RouterStaking  kodiakRouter = IKodiakV1RouterStaking(Kodiak_RouterV3);
+
+       (uint256 amount0,
+            uint256 amount1,
+            uint128 liquidityBurned)= kodiakRouter.removeLiquidity(
+            lpvault, 
+            liquidity,
+            1, 1, 
+            address(this));
+        console.log("Amount0", amount0);
+        console.log("Amount1", amount1);
+        console.log("Liquidity withdrawn from the pool", liquidityBurned);
+    }
+
     function checkforLP() public view returns (uint) {
         return IERC20(LPvaultTokenAddress).balanceOf(address(this));
     }
+
+    // stake into the Infrared IBGT-WBERA Vault
+    function stake(uint256 lp) public   {
+        // need to approve vault with the LP token from contract
+        IERC20(LPvaultTokenAddress).approve(InfraredVault, lp);
+        // IRestaking restaking = IRestaking(InfraredVault);
+        StakeFarm.stake(lp);
+        console.log("Staked LP tokens into the vault", StakeFarm.balanceOf(address(this)));
+    }
+
+    function withdraw(uint256 _amount) public {
+
+        StakeFarm.withdraw(_amount);
+        console.log("withdraw LP tokens into the vault", StakeFarm.balanceOf(address(this)));
+    }
+
+    // TODO: function for reinvest 
 
     function runVault(uint256 _amount) public {
         DepositLBGTtoken(_amount);
         sellLBGTforWBERAusingBurbear();
         buyIBGTfromWBERAkodiak();
-        addLiquidityv3pool();
+        uint256 lpvalue = addLiquidityv3pool();
+        stake(lpvalue);
+        withdraw(lpvalue);
+        withdrawLiquidityv3pool();
     }
 }

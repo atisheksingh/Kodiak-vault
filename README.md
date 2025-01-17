@@ -22,7 +22,7 @@ Deposit:
 
  User calls depositLBGT function which takes LBGT and then sells it on burbear for WBERA,
 
- then uses part of the WBERA to buy IBGT. Then add WBERA and IBGT to the WBERA-IBGT LP vault using Kodiak Router  to get LP tokens. done 
+ then uses part of the WBERA to buy IBGT. Then add WBERA and IBGT to the WBERA-IBGT LP vault using Kodiak Router  to get LP tokens. *done* 
 
 
 
@@ -34,8 +34,21 @@ Based on the amount of LP tokens received, the user gets vault shares(VCANA).
 Which means the asset of the vault is LP tokens and not LBGT. 
 
 These LP tokens are then staked into the Infrared IBGT-WBERA Vault.
+*done*
 
-Withdraw: User calls withdrawLBGT functions, their shares(VCANA) are burnt, the corresponding amount of LP tokens are unstaked from the Infrared IBGT-WBERA Vault and then these LP tokens are again used to remove liquidity from the Kodiak Router to get WBERA and IBGT.
+
+
+
+Withdraw: 
+
+
+User calls withdrawLBGT functions, their shares(VCANA) are burnt, 
+
+the corresponding amount of LP tokens are unstaked from the 
+
+Infrared IBGT-WBERA Vault and then these LP tokens are again used to remove liquidity from the Kodiak Router to get WBERA and IBGT.
+
+### done 
 
 Both of them are sold to get LBGT and returned to the user.
 
@@ -79,5 +92,6 @@ https://app.kodiak.finance/#/liquidity/pools/0x7fd165b73775884a38aa8f2b384a53a3c
 [text](https://bartio.beratrail.io/tx/0x9c0e45fb9cddb48fbd9c80ffc9a7e6f6a75ee7fc49a449904e9c2f00bac2121c)
 
 
+## current progress 
 
-![alt text](image.png)
+![alt text](image-1.png)

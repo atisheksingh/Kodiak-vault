@@ -280,4 +280,18 @@ interface IKodiakV1RouterStaking {
         );
 }
 
+interface IStaking {
+
+    function stake(uint256 amount) external;
+
+    function withdraw(uint256 amount) external;
+
+    function balanceOf(address account) external view returns (uint256);
+
+    function earned(address account) external view returns (uint256);
+
+    function setOperator(address _operatorAddress) external;
+
+}
+
 
