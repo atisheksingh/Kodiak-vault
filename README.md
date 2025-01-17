@@ -77,3 +77,7 @@ https://app.kodiak.finance/#/liquidity/pools/0x7fd165b73775884a38aa8f2b384a53a3c
 
 // ADDING LIQ in v3 pool WBERA-IBGT LP 
 [text](https://bartio.beratrail.io/tx/0x9c0e45fb9cddb48fbd9c80ffc9a7e6f6a75ee7fc49a449904e9c2f00bac2121c)
+
+
+
+![alt text](image.png)
