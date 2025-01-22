@@ -4,10 +4,12 @@ pragma solidity ^0.8.20;
 
 import "./interfaces/irestaking.sol";
 import "./interfaces/iburbear.sol";
+import "../contracts/erc4626.sol";
+import "../contracts/utils/OwnableNew.sol";
 
 import "hardhat/console.sol";
 
-contract AutoCompoundingVault  {
+contract AutoCompoundingVault  is ERC4626 , OwnableNew {
 
     // static addresses
     address public LBGTTokenAddress = 0x32Cf940DB5d7ea3e95e799A805B1471341241264;
@@ -24,13 +26,18 @@ contract AutoCompoundingVault  {
     IERC20 public LBGTtoken = IERC20(LBGTTokenAddress);
     IERC20 public WBERAtoken = IERC20(WBERATokenAddress);
     IERC20 public IBGTtoken = IERC20(IBGTTokenAddress);
-
     IERC20 public Lpvault = IERC20(LPvaultTokenAddress);
-
     IRouter public BurbearRouter = IRouter(BurbearRouterAddress);
     IStaking public StakeFarm = IStaking(InfraredVault);
     
-    
+        // use a  constructor for erc4626 
+
+    constructor(  address _lp,
+        string memory _name,
+        string memory _symbol )ERC4626(ERC20(_lp)) ERC20(_name, _symbol) OwnableNew(msg.sender) {
+
+    }
+
     function DepositLBGTtoken(uint256 _amount) public {
         // please provide approval for the contract to spend the LBGT token
         LBGTtoken.transferFrom(msg.sender, address(this), _amount);
@@ -157,16 +164,18 @@ contract AutoCompoundingVault  {
     }
 
     // stake into the Infrared IBGT-WBERA Vault
-    function stake(uint256 lp) public   {
+    function stake(uint256 lp) public  returns (uint) {
         // need to approve vault with the LP token from contract
         IERC20(LPvaultTokenAddress).approve(InfraredVault, lp);
         // IRestaking restaking = IRestaking(InfraredVault);
         StakeFarm.stake(lp);
         console.log("Staked LP tokens into the vault", StakeFarm.balanceOf(address(this)));
+        return StakeFarm.earned(address(this));
     }
+.
+   
 
     function withdraw(uint256 _amount) public {
-
         StakeFarm.withdraw(_amount);
         console.log("withdraw LP tokens into the vault", StakeFarm.balanceOf(address(this)));
     }
@@ -179,7 +188,7 @@ contract AutoCompoundingVault  {
         buyIBGTfromWBERAkodiak();
         uint256 lpvalue = addLiquidityv3pool();
         stake(lpvalue);
-        withdraw(lpvalue);
-        withdrawLiquidityv3pool();
+        // withdraw(lpvalue);
+        // withdrawLiquidityv3pool();
     }
 }

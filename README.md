@@ -54,6 +54,14 @@ Both of them are sold to get LBGT and returned to the user.
 
 Reinvest: The contract should claim rewards from the Infrared vault. Sell the rewards for WBERA. Use part of the WBERA to get IBGT, add these to the WBERA-IBGT LP vault using Kodiak Router  to get LP tokens, and then stake these LP tokens back into the Infrared Vault.
 
+
+
+make it erc4626 deposit how many shares given 
+
+
+
+1+1 = 2 
+
 Swapping guide:
 
 LBGT to WBERA and vice versa: Burrbear
