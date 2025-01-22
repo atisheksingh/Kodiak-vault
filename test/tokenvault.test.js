@@ -24,6 +24,7 @@ describe("TokenVault", function () {
 
         const LbgToken = await ethers.getContractAt("contracts/utils/IERC20.sol:IERC20", lbgTokenAddress);
         const LbgtTokenBalance = await LbgToken.balanceOf(impersonatedSigner.address);
+
         console.log(`Balance of LBGT Token: ${LbgtTokenBalance.toString()}`);
 
         const wberaAddresstoken = await ethers.getContractAt("contracts/utils/IERC20.sol:IERC20", wberaAddress);
@@ -35,12 +36,12 @@ describe("TokenVault", function () {
 
         //sending approve from LGT to tokenVault
         await LbgToken.connect(impersonatedSigner).approve(tokenVault.target, LbgtTokenBalance);
-        console.log(`Approved LBG Token`);
+        console.log(`Approved LBG Token`, LbgtTokenBalance);
         // running the function
         // checking the balance of the LP token
         const LPbalance = await tokenVault.checkforLP()
         console.log(`Balance of LP Token: ${LPbalance.toString()}`);
-        const LpVaultAddresstoken = await ethers.getContractAt("contracts/utils/IERC20.sol:IERC20", "0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6");
+        // const LpVaultAddresstoken = await ethers.getContractAt("contracts/utils/IERC20.sol:IERC20", "0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6");
        
         // await tokenVault.connect(impersonatedSigner).checkforEarnedRewards();
         await tokenVault.connect(impersonatedSigner).runVault(LbgtTokenBalance);

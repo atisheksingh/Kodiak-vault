@@ -29,27 +29,48 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
     IERC20 public Lpvault = IERC20(LPvaultTokenAddress);
     IRouter public BurbearRouter = IRouter(BurbearRouterAddress);
     IStaking public StakeFarm = IStaking(InfraredVault);
-    
-        // use a  constructor for erc4626 
 
-    constructor(  address _lp,
+    mapping (address => uint) public sharesbalance;
+    
+   
+    // use a  constructor for erc4626 
+    //Set the underlying asset contract. This must be an ERC20-compatible contract (ERC-20 or ERC-777).
+    // name and symbol are the name and symbol of the LP token
+
+    constructor( address _lp,
         string memory _name,
         string memory _symbol )ERC4626(ERC20(_lp)) ERC20(_name, _symbol) OwnableNew(msg.sender) {
 
     }
+    
 
-    function DepositLBGTtoken(uint256 _amount) public {
+    function DepositLBGTtoken(uint256 _amount) public returns (uint) {
         // please provide approval for the contract to spend the LBGT token
+        require(_amount > 0, "Deposit amount too low");
         LBGTtoken.transferFrom(msg.sender, address(this), _amount);
-        console.log("LBGT token depositing");
         uint LBGTtokenBal = LBGTtoken.balanceOf(address(this));
-        console.log(LBGTtokenBal , "contract balance");
+        // uint sharesMinted = deposit(_amount, msg.sender); // minting shares via vault
+        // console.log(sharesMinted , "contract balance");
+        return 0;
     }
 
-    function sellLBGTforWBERAusingBurbear() public  returns (uint) {
-        uint LBGTtokenBal = LBGTtoken.balanceOf(address(this));
-        console.log(LBGTtokenBal , "contract balance");
-        LBGTtoken.approve(address(BurbearRouter), LBGTtokenBal);
+    function reinvest(uint _amount) public {
+        // reinvest the rewards
+        // 1. minting new shares
+        DepositLBGTtoken(_amount);
+        // 2. adding liquidity to the pool
+
+        // 3. staking the LP tokens
+        // 4. getting rewards
+    
+
+
+
+    }
+   
+
+    function sellLBGTforWBERAusingBurbear(uint _amount) public  returns (uint) {
+        LBGTtoken.approve(address(BurbearRouter), _amount);
         uint deadline = block.timestamp + 1000;
 
         IRouter.SingleSwap memory singleSwap;
@@ -57,7 +78,7 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
         singleSwap.kind = IRouter.SwapKind.GIVEN_IN;
         singleSwap.assetIn = IAsset(address(LBGTtoken));
         singleSwap.assetOut = IAsset(address(WBERAtoken));
-        singleSwap.amount = LBGTtokenBal;
+        singleSwap.amount = _amount;
         singleSwap.userData = "";
 
         // Create the FundManagement struct
@@ -83,14 +104,14 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
         // sell token for LBGT
     }
 
-    function buyIBGTfromWBERAkodiak() public returns (uint) {
-        uint WBERAtokenBal = WBERAtoken.balanceOf(address(this))/2; // using half of the WBERA to buy IBGT
-        console.log(WBERAtokenBal, "WBERA balance");
+    function buyIBGTfromWBERAkodiak(uint wbearamount) public returns (uint) {
+        uint _amount = wbearamount/2; // using half of the WBERA to buy IBGT
+        console.log(_amount, "WBERA balance");
         address[] memory path = new address[](2);
         path[0] = WBERATokenAddress;
         path[1] = LBGTTokenAddress;
         // approve KodiakSwapV3 to spend WBERA
-        WBERAtoken.approve(address(KodiakSwapV3), WBERAtokenBal);
+        WBERAtoken.approve(address(KodiakSwapV3), _amount);
         // Sell WBERA to LBGT
         uint deadline = block.timestamp + 1000;
         ISwapRouter.ExactInputSingleParams memory swapParams = ISwapRouter.ExactInputSingleParams({
@@ -99,7 +120,7 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
             fee: 500, //add fee variable
             recipient: address(this),
             deadline: deadline,
-            amountIn: WBERAtokenBal,
+            amountIn: _amount,
             amountOutMinimum: 0,
             sqrtPriceLimitX96: 0
         });
@@ -112,25 +133,25 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
     }
 
     // adding liquidity to the v3 pool
-    function addLiquidityv3pool() public  returns (uint) { 
+    function addLiquidityv3pool(uint _amountIBGTtoken, uint _amountWBERAtoken) public  returns (uint) { 
 
-        uint amountADesired = IBGTtoken.balanceOf(address(this));
-        uint amountBDesired = WBERAtoken.balanceOf(address(this));
-        console.log(amountADesired, "IBGT balance");
-        console.log(amountBDesired, "WBERA balance");
+        // uint amountADesired = IBGTtoken.balanceOf(address(this));
+        // uint amountBDesired = WBERAtoken.balanceOf(address(this));
+        // console.log(amountADesired, "IBGT balance");
+        // console.log(amountBDesired, "WBERA balance");
         //  tokenA and tokenB minimum amounts
-        uint amountAMin = amountADesired / 2;
-        uint amountBMin = amountBDesired / 2;
+        uint amountAMin = _amountIBGTtoken / 2;
+        uint amountBMin = _amountWBERAtoken / 2;
         //approval
-        IBGTtoken.approve(Kodiak_RouterV3, amountADesired);
-        WBERAtoken.approve(Kodiak_RouterV3, amountBDesired);
+        IBGTtoken.approve(Kodiak_RouterV3, _amountIBGTtoken);
+        WBERAtoken.approve(Kodiak_RouterV3, _amountWBERAtoken);
 
-        require((amountADesired != 0)&&(amountBDesired != 0),"Swap Failed");
+        require((_amountIBGTtoken != 0)&&(_amountWBERAtoken != 0),"Swap Failed");
 
         IKodiakVaultV1 lpvault = IKodiakVaultV1(LPvaultTokenAddress);
 
         IKodiakV1RouterStaking  kodiakRouter = IKodiakV1RouterStaking(Kodiak_RouterV3);
-        (, , uint liquidity) =kodiakRouter.addLiquidity(lpvault, amountADesired, amountBDesired, amountAMin, amountBMin, 1, address(this));
+        (, , uint liquidity) =kodiakRouter.addLiquidity(lpvault, _amountIBGTtoken, _amountWBERAtoken, amountAMin, amountBMin, 1, address(this));
         console.log("Liquidity added to the pool", liquidity);
         return liquidity;
 
@@ -170,11 +191,15 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
         // IRestaking restaking = IRestaking(InfraredVault);
         StakeFarm.stake(lp);
         console.log("Staked LP tokens into the vault", StakeFarm.balanceOf(address(this)));
-        return StakeFarm.earned(address(this));
+        return  StakeFarm.balanceOf(address(this));
     }
-.
-   
 
+    function Get_rewards() public  returns (uint)
+    {  
+        StakeFarm.getReward(); 
+
+        return StakeFarm.balanceOf(address(this));
+    }
     function withdraw(uint256 _amount) public {
         StakeFarm.withdraw(_amount);
         console.log("withdraw LP tokens into the vault", StakeFarm.balanceOf(address(this)));
@@ -183,12 +208,22 @@ contract AutoCompoundingVault  is ERC4626 , OwnableNew {
     // TODO: function for reinvest 
 
     function runVault(uint256 _amount) public {
-        DepositLBGTtoken(_amount);
-        sellLBGTforWBERAusingBurbear();
-        buyIBGTfromWBERAkodiak();
-        uint256 lpvalue = addLiquidityv3pool();
+        // deposit LBGT token
+        uint lpshares = DepositLBGTtoken(_amount);
+        // sell LBGT for WBERA
+        uint _amountWBERAtokentosell =  sellLBGTforWBERAusingBurbear(_amount);
+        // buy IBGT from WBERA
+        uint Ibgtamount =  buyIBGTfromWBERAkodiak( _amountWBERAtokentosell);
+        // add liquidity to the v3 pool
+        uint AmountWBERAtoken = WBERAtoken.balanceOf(address(this));
+
+        uint lpvalue = addLiquidityv3pool(Ibgtamount , AmountWBERAtoken);
+
         stake(lpvalue);
-        // withdraw(lpvalue);
-        // withdrawLiquidityv3pool();
+
+        uint reward = Get_rewards();
+        console.log("rewarrds claimed", reward);
+        withdraw(lpvalue);
+        withdrawLiquidityv3pool();
     }
 }

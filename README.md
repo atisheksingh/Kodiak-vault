@@ -88,6 +88,11 @@ Kodiak RouterV3: 0x4d41822c1804ffF5c038E4905cfd1044121e0E85
 Burrbear Swap/Router: 0xFDb2925aE2d3E2eacFE927611305e5e56AA5f832
 Infrared IBGT-WBERA Vault: 0x763F65E5F02371aD6C24bD60BCCB0b14E160d49b
 
+interface can be found here   : 
+https://infrared-dao.github.io/infrared-contracts/src/interfaces/IMultiRewards.sol/interface.IMultiRewards.html?highlight=stake#stake
+
+
+
 
 https://infrared.finance/vaults/kodiak-ibgt-wbera?details=false
 
