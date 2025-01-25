@@ -59,6 +59,14 @@ Reinvest: The contract should claim rewards from the Infrared vault. Sell the re
 make it erc4626 deposit how many shares given 
 
 
+total asset :
+
+  function totalAssets() public view override returns (uint256) {
+        return kodiakPlugin.balanceOf(address(this));
+    }
+
+    check for the balance of the staking vault  Istaking 
+
 
 1+1 = 2 
 

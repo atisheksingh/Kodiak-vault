@@ -14,7 +14,7 @@ describe("TokenVault", function () {
         });
         const impersonatedSigner = await ethers.getSigner(impersonatedAccount);
         const TokenVault = await ethers.getContractFactory("AutoCompoundingVault");
-        const tokenVault = await TokenVault.connect(impersonatedSigner).deploy("0x32Cf940DB5d7ea3e95e799A805B1471341241264", "lp share ","lp");
+        const tokenVault = await TokenVault.connect(impersonatedSigner).deploy("0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6", "lp share ","lp");
         // checking the address of the tokenVault
         console.log(`[TokenVault] Attached to: `, tokenVault.target);
         // check for balance of the account of the  address 
@@ -39,8 +39,8 @@ describe("TokenVault", function () {
         console.log(`Approved LBG Token`, LbgtTokenBalance);
         // running the function
         // checking the balance of the LP token
-        const LPbalance = await tokenVault.checkforLP()
-        console.log(`Balance of LP Token: ${LPbalance.toString()}`);
+        // const LPbalance = await tokenVault.checkforLP()
+        // console.log(`Balance of LP Token: ${LPbalance.toString()}`);
         // const LpVaultAddresstoken = await ethers.getContractAt("contracts/utils/IERC20.sol:IERC20", "0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6");
        
         // await tokenVault.connect(impersonatedSigner).checkforEarnedRewards();
