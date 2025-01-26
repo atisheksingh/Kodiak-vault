@@ -32,7 +32,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     IERC20 public IBGTtoken = IERC20(IBGTTokenAddress);
     IERC20 public Lpvault = IERC20(LPvaultTokenAddress);
     IRouter public BurbearRouter = IRouter(BurbearRouterAddress);
-    IStaking public StakeFarm = IStaking(InfraredVault);
+    IStaking public Vault = IStaking(InfraredVault);
 
     constructor(
         address _lp, // vault address 0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6
@@ -161,7 +161,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         console.log(rewards, "rewards claimed by contract");
         // rewards in ibgt token convert webra
         uint wberaAmount = sell_ibgt_For_wbera(rewards);
-        //??
+        // rewards in wbera token convert lbgt
         uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
         // sending user lbgt token
         LBGTtoken.transfer(msg.sender, LBGTamount);
@@ -177,19 +177,19 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         console.log("stake reached here");
         // IRestaking restaking = IRestaking(InfraredVault);
         // bool v =
-        StakeFarm.stake(lp);
+        Vault.stake(lp);
         // console.log(v, "staked");
         console.log(
             "Staked LP tokens into the vault",
-            StakeFarm.balanceOf(address(this))
+            Vault.balanceOf(address(this))
         );
-        return StakeFarm.balanceOf(address(this));
+        return Vault.balanceOf(address(this));
     }
 
     function Get_rewards() public returns (uint) {
         uint bal1 = IBGTtoken.balanceOf(address(this));
         console.log("ibgt balance ", bal1);
-        StakeFarm.getReward();
+        Vault.getReward();
         // exit();
         uint bal = IBGTtoken.balanceOf(address(this));
         console.log("rewards claimed", bal);
@@ -199,9 +199,15 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     function exit() public {
         // get back lp token
         // withdraw(); // erc4626 vault
-        StakeFarm.exit();
+        Vault.exit();
         // send LBGT token to user
-        LBGTtoken.transfer(msg.sender, LBGTtoken.balanceOf(address(this)));
+        uint _amount = IBGTtoken.balanceOf(address(this));
+
+        uint wberaAmount = sell_ibgt_For_wbera(_amount);
+        // rewards in wbera token convert lbgt
+        uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
+    
+        LBGTtoken.transfer(msg.sender, LBGTamount);
     }
 
     function checkamount() public view {
@@ -212,10 +218,10 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
 
     // backward
     function withdraw(uint256 _amount) public {
-        StakeFarm.withdraw(_amount);
+        Vault.withdraw(_amount);
         console.log(
             "withdraw LP tokens into the vault",
-            StakeFarm.balanceOf(address(this))
+            Vault.balanceOf(address(this))
         );
     }
 
@@ -312,7 +318,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     // over riding the totalAsset function of the vault
     function totalAssets() public view override returns (uint256) {
         // checking the balance of the vault
-        return StakeFarm.balanceOf(address(this));
+        return Vault.balanceOf(address(this));
     }
 }
 
