@@ -21,7 +21,7 @@ module.exports = {
       forking: {
         enabled:true,
         url: 'https://berachain-bartio.g.alchemy.com/v2/5NYUc5UX0Ht1_wsash-9iZCh6b-rvJuL',
-        blockNumber: 9349245,
+        blockNumber: 9802947,
         accounts: [`0x${PRIVATE_KEY}`],
         chainId: 80084,
       },

@@ -7,10 +7,6 @@ interface IAsset {
     // solhint-disable-previous-line no-empty-blocks
 }
 
-// Interface for Router
-pragma solidity 0.8.20;
-
-
 interface IRouter {
 
     struct JoinPoolRequest {
@@ -69,3 +65,4 @@ interface IRouter {
     }
 
 }
+

@@ -140,24 +140,6 @@ interface IKodiakVaultV1 {
     function pool() external view returns (address);
 }
 
-interface IGauge {
-    /*----------  FUNCTIONS  --------------------------------------------*/
-    function getReward(address account) external;
-    function notifyRewardAmount(address token, uint amount) external;
-    /*----------  RESTRICTED FUNCTIONS  ---------------------------------*/
-    function _deposit(address account, uint256 amount) external;
-    function _withdraw(address account, uint256 amount) external;
-    function addReward(address rewardToken) external;
-    /*----------  VIEW FUNCTIONS  ---------------------------------------*/
-    function balanceOf(address account) external view returns (uint256);
-    function totalSupply() external view returns (uint256);
-    function rewardPerToken(address reward) external view returns (uint);
-    function getRewardForDuration(address reward) external view returns (uint);
-    function earned(address account, address reward) external view returns (uint);
-    function left(address token) external view returns (uint);
-    function getRewardTokens() external view returns (address[] memory);
-}
-
 interface IKodiakV1RouterStaking {
     function addLiquidity(
         IKodiakVaultV1 pool,
@@ -282,13 +264,31 @@ interface IKodiakV1RouterStaking {
         );
 }
 
+interface IGauge {
+    /*----------  FUNCTIONS  --------------------------------------------*/
+    function getReward(address account) external;
+    function notifyRewardAmount(address token, uint amount) external;
+    /*----------  RESTRICTED FUNCTIONS  ---------------------------------*/
+    function _deposit(address account, uint256 amount) external;
+    function _withdraw(address account, uint256 amount) external;
+    function addReward(address rewardToken) external;
+    /*----------  VIEW FUNCTIONS  ---------------------------------------*/
+    function balanceOf(address account) external view returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function rewardPerToken(address reward) external view returns (uint);
+    function getRewardForDuration(address reward) external view returns (uint);
+    function earned(address account, address reward) external view returns (uint);
+    function left(address token) external view returns (uint);
+    function getRewardTokens() external view returns (address[] memory);
+}
+
 
 // Infrared vault
 // https://infrared-dao.github.io/infrared-contracts/src/interfaces/IMultiRewards.sol/interface.IMultiRewards.html?highlight=stake#stake
 interface IStaking {
 
     function totalSupply() external view returns (uint256);
-    function stake(uint256 amount) external;
+    function stake(uint256 amount) external ;
     function withdraw(uint256 amount) external;
     function getReward() external;
     function exit() external;
@@ -326,10 +326,11 @@ interface IStaking {
 
     function getRewardForUser(address _user) external;
 
-
-
-
-
 }
+
+// interface Ivault{
+//     function stake(uint256 amount) external returns (bool);
+//     function getReward() external;
+// }
 
 

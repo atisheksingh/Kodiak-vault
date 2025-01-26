@@ -116,3 +116,18 @@ https://app.kodiak.finance/#/liquidity/pools/0x7fd165b73775884a38aa8f2b384a53a3c
 ## current progress 
 
 ![alt text](image-1.png)
+
+
+
+ {
+      "beraRewardsVault": "0x7b15eec57c60f8b68df2b143c2ca5a772e787e86",
+      "lpTokenAddress": "0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6",
+      "mintUrl": "https://app.kodiak.finance/#/liquidity/pools/0x7fd165b73775884a38aa8f2b384a53a3ca7400e6?chain=berachain_bartio",
+      "name": "iBGT-WBERA",
+      "protocol": "kodiak",
+      "types": ["amm"],
+      "underlyingTokens": [
+        "0x46eFC86F0D7455F135CC9df501673739d513E982",
+        "0x7507c1dc16935B82698e4C63f2746A2fCf994dF8"
+      ]
+    },
