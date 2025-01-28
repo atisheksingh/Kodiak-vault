@@ -155,16 +155,30 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     event Reinvestment(address indexed caller, uint256 reward, uint256 bounty);
 
     // Re-invest whatever this worker has earned back to staked LP tokens.
-    function Reinvest() public {
+    function ClaimRewardonStakedToken() public {
         // get rewards from the existing staking
-        uint rewards = Get_rewards();
+        uint rewards = GetrewardsFromInfra();
         console.log(rewards, "rewards claimed by contract");
-        // rewards in ibgt token convert webra
-        uint wberaAmount = sell_ibgt_For_wbera(rewards);
-        // rewards in wbera token convert lbgt
-        uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
-        // sending user lbgt token
-        LBGTtoken.transfer(msg.sender, LBGTamount);
+      
+    }
+
+    function ReinvestReawardInfra() public {
+
+        // get rewards from the existing staking 
+        uint rewards = GetrewardsFromInfra();
+        console.log(rewards, "rewards claimed by contract");
+        // spending half rewards in ibgt token convert webra 
+        uint wberaAmount = sell_ibgt_For_wbera(rewards/2);
+        
+        console.log(wberaAmount, "rewards claimed by contract");
+        // add in the liquidity pool 
+        addLiquidityv3pool(rewards/2, wberaAmount);
+        // checking for lp token to staking 
+        uint lp = checkforLP();
+        // staking the lp token
+        stake(lp);
+
+        console.log("Rewards reinvested");
     }
 
     function checkforLP() public view returns (uint) {
@@ -186,19 +200,17 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return Vault.balanceOf(address(this));
     }
 
-    function Get_rewards() public returns (uint) {
+    function GetrewardsFromInfra() public returns (uint) {
         uint bal1 = IBGTtoken.balanceOf(address(this));
         console.log("ibgt balance ", bal1);
         Vault.getReward();
-        // exit();
         uint bal = IBGTtoken.balanceOf(address(this));
         console.log("rewards claimed", bal);
         return bal;
     }
 
-    function exit() public {
+    function LBGTWithdraw() public {
         // get back lp token
-        // withdraw(); // erc4626 vault
         Vault.exit();
         // send LBGT token to user
         uint _amount = IBGTtoken.balanceOf(address(this));
@@ -217,7 +229,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     }
 
     // backward
-    function withdraw(uint256 _amount) public {
+    function withdrawStakedtokenInfra(uint256 _amount) public {
         Vault.withdraw(_amount);
         console.log(
             "withdraw LP tokens into the vault",
@@ -302,6 +314,32 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         uint256 amountOut = BurbearRouter.swap(singleSwap, funds, 0, deadline);
         console.log("Lgbt bought", amountOut);
         return amountOut;
+    }
+
+
+    function _withdraw(
+        address caller,
+        address receiver,
+        address owner,
+        uint256 assets,
+        uint256 shares
+    ) internal override {
+        if (caller != owner) {
+            _spendAllowance(owner, caller, shares);
+        }
+
+        _burn(owner, shares);
+        Vault.withdraw(assets);
+
+        uint lpBal = checkforLP();
+        console.log(lpBal, "lp balance");
+        // rewards in ibgt token convert webra
+        uint wberaAmount = sell_ibgt_For_wbera(lpBal);
+        // rewards in wbera token convert lbgt
+        uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
+        // sending user lbgt token
+        LBGTtoken.transfer(msg.sender, LBGTamount);
+        emit Withdraw(caller, receiver, owner, assets, shares);
     }
 
     // overrriding the deposit function of the vault

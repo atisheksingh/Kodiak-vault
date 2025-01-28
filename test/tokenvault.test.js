@@ -51,14 +51,14 @@ describe("TokenVault", function () {
         await network.provider.send("evm_increaseTime", [345600]) // Increase time by 2 Days => 86400 * 2 =172800
         await network.provider.send("evm_mine")
 
-        await tokenVault.connect(impersonatedSigner).Get_rewards();
+        // await tokenVault.connect(impersonatedSigner).Get_rewards();
 
         await network.provider.send("evm_increaseTime", [172800]) // Increase time by 2 Days => 86400 * 2 =172800
         await network.provider.send("evm_mine")
         // if the token have increament value mean the rewards are added in out contract . 
         // await tokenVault.connect(impersonatedSigner).Get_rewards();
 
-        await tokenVault.connect(impersonatedSigner).Reinvest();
+        await tokenVault.connect(impersonatedSigner).ReinvestReawardInfra();
 
         const LbgtTokenBalanceafterReinvest = await LbgToken.balanceOf(impersonatedSigner.address);
         console.log(LbgtTokenBalanceafterReinvest, "After reinvesting the rewards");

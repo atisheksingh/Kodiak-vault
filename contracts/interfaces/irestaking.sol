@@ -289,8 +289,11 @@ interface IStaking {
 
     function totalSupply() external view returns (uint256);
     function stake(uint256 amount) external ;
+    // Withdraws staked tokens from the contract Transfers amount of staking tokens back to the user's wallet
     function withdraw(uint256 amount) external;
+    // Claims all pending rewards for the caller Transfers all accrued rewards to the caller
     function getReward() external;
+    // Withdraws all staked tokens and claims pending rewards `exit()` Combines withdraw and getReward operations
     function exit() external;
     function balanceOf(address account) external view returns (uint256);
     function lastTimeRewardApplicable(address _rewardsToken) external view returns (uint256);

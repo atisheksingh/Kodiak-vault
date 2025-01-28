@@ -48,13 +48,14 @@ the corresponding amount of LP tokens are unstaked from the
 
 Infrared IBGT-WBERA Vault and then these LP tokens are again used to remove liquidity from the Kodiak Router to get WBERA and IBGT.
 
-### done 
+
 
 Both of them are sold to get LBGT and returned to the user.
 
 Reinvest: The contract should claim rewards from the Infrared vault. Sell the rewards for WBERA. Use part of the WBERA to get IBGT, add these to the WBERA-IBGT LP vault using Kodiak Router  to get LP tokens, and then stake these LP tokens back into the Infrared Vault.
+https://infrared-dao.github.io/infrared-contracts/src/interfaces/IMultiRewards.sol/interface.IMultiRewards.html#exit
 
-
+### done 
 
 make it erc4626 deposit how many shares given 
 
@@ -115,8 +116,7 @@ https://app.kodiak.finance/#/liquidity/pools/0x7fd165b73775884a38aa8f2b384a53a3c
 
 ## current progress 
 
-![alt text](image-1.png)
-
+![alt text](image-2.png)
 
 
  {
