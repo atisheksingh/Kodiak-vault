@@ -58,7 +58,7 @@ describe("TokenVault", function () {
         // if the token have increament value mean the rewards are added in out contract . 
         // await tokenVault.connect(impersonatedSigner).Get_rewards();
 
-        await tokenVault.connect(impersonatedSigner).ReinvestReawardInfra();
+        await tokenVault.connect(impersonatedSigner).LBGTWithdraw();
 
         const LbgtTokenBalanceafterReinvest = await LbgToken.balanceOf(impersonatedSigner.address);
         console.log(LbgtTokenBalanceafterReinvest, "After reinvesting the rewards");

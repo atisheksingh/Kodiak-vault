@@ -209,16 +209,16 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return bal;
     }
 
-    function LBGTWithdraw() public {
-        // get back lp token
-        Vault.exit();
+    function LBGTWithdraw(address ) public {
+        // we need to burn the shares AND  get back the token needed 
+        _withdraw(msg.sender, msg.sender, msg.sender, 0, balanceOf(msg.sender));
         // send LBGT token to user
         uint _amount = IBGTtoken.balanceOf(address(this));
-
+        // rewards in ibgt token so convert into wbera
         uint wberaAmount = sell_ibgt_For_wbera(_amount);
-        // rewards in wbera token convert lbgt
+        // wbera to lbgt 
         uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
-    
+        // finally transferring back to user 
         LBGTtoken.transfer(msg.sender, LBGTamount);
     }
 
@@ -316,6 +316,15 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return amountOut;
     }
 
+    modifier checkforshare {
+        require(balanceOf(msg.sender) > 0, "No shares to withdraw");
+        _;
+    }
+
+    function UserWithdraw() public checkforshare {
+        _withdraw(msg.sender, msg.sender, msg.sender, 0, balanceOf(msg.sender));
+    }
+
 
     function _withdraw(
         address caller,
@@ -327,18 +336,9 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         if (caller != owner) {
             _spendAllowance(owner, caller, shares);
         }
-
         _burn(owner, shares);
-        Vault.withdraw(assets);
-
-        uint lpBal = checkforLP();
-        console.log(lpBal, "lp balance");
-        // rewards in ibgt token convert webra
-        uint wberaAmount = sell_ibgt_For_wbera(lpBal);
-        // rewards in wbera token convert lbgt
-        uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
-        // sending user lbgt token
-        LBGTtoken.transfer(msg.sender, LBGTamount);
+        // withdraw  everything from the vault 
+        Vault.exit();
         emit Withdraw(caller, receiver, owner, assets, shares);
     }
 
