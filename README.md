@@ -131,3 +131,11 @@ https://app.kodiak.finance/#/liquidity/pools/0x7fd165b73775884a38aa8f2b384a53a3c
         "0x7507c1dc16935B82698e4C63f2746A2fCf994dF8"
       ]
     },
+
+
+## deployment 
+
+
+    npx hardhat run scripts/deployVault.js  --network bera
+    
+    npx hardhat verify --network bera 0x31d80A5CCc732aF4D03F63E9a91554dd2f8BFe34  0x7fd165B73775884a38AA8f2B384A53A3Ca7400E6 lp share  lp

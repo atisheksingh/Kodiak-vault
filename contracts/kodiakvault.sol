@@ -34,11 +34,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     IRouter public BurbearRouter = IRouter(BurbearRouterAddress);
     IStaking public Vault = IStaking(InfraredVault);
 
-    constructor(
-        address _lp, 
-        string memory _name,
-        string memory _symbol
-    ) ERC4626(ERC20(_lp)) ERC20(_name, _symbol) OwnableNew(msg.sender) {}
+    constructor(address _lp, string memory _name, string memory _symbol) ERC4626(ERC20(_lp)) ERC20(_name, _symbol) OwnableNew(msg.sender) {}
 
     // depositing LBGT token in the vault
     function DepositLBGTtoken(uint256 _amount) public returns (uint) {
@@ -66,8 +62,22 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return LBGTtokenBal;
     }
 
-    //forward
-    function sell_LBGTforWBERAusingBurbear(uint _amount) public returns (uint) {
+    function stake(uint256 lp) public returns (uint) {
+        // need to approve vault with the LP token from contract
+        IERC20(LPvaultTokenAddress).approve(InfraredVault, lp);
+        console.log("stake reached here");
+        // IRestaking restaking = IRestaking(InfraredVault);
+        // bool v =
+        Vault.stake(lp);
+        // console.log(v, "staked");
+        console.log(
+            "Staked LP tokens into the vault",
+            Vault.balanceOf(address(this))
+        );
+        return Vault.balanceOf(address(this));
+    }
+
+    function sell_LBGTforWBERAusingBurbear(uint _amount) internal returns (uint) {
         LBGTtoken.approve(address(BurbearRouter), _amount);
         uint deadline = block.timestamp + 1000;
 
@@ -92,7 +102,6 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return amountOut;
     }
 
-    //forward
     function buyIBGTfromWBERAkodiak(uint wbearamount) public returns (uint) {
         uint _amount = wbearamount / 2; // using half of the WBERA to buy IBGT
         console.log(_amount, "WBERA balance");
@@ -118,8 +127,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return amountOut;
     }
 
-    // adding liquidity to the v3 pool //forward
-    function addLiquidityv3pool( uint _amountIBGTtoken, uint _amountWBERAtoken ) public returns (uint) {
+    function addLiquidityv3pool( uint _amountIBGTtoken, uint _amountWBERAtoken ) internal returns (uint) {
         uint amountAMin = 0; //_amountIBGTtoken -1;
         uint amountBMin = 0; //_amountWBERAtoken -1;
         //approval
@@ -151,7 +159,6 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
 
     event Reinvestment(address indexed caller, uint256 reward, uint256 bounty);
 
-    // Re-invest whatever this worker has earned back to staked LP tokens.
     function ClaimRewardonStakedToken() public {
         // get rewards from the existing staking
         uint rewards = GetrewardsFromInfra();
@@ -182,21 +189,6 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return IERC20(LPvaultTokenAddress).balanceOf(address(this));
     }
 
-    function stake(uint256 lp) public returns (uint) {
-        // need to approve vault with the LP token from contract
-        IERC20(LPvaultTokenAddress).approve(InfraredVault, lp);
-        console.log("stake reached here");
-        // IRestaking restaking = IRestaking(InfraredVault);
-        // bool v =
-        Vault.stake(lp);
-        // console.log(v, "staked");
-        console.log(
-            "Staked LP tokens into the vault",
-            Vault.balanceOf(address(this))
-        );
-        return Vault.balanceOf(address(this));
-    }
-
     function GetrewardsFromInfra() public returns (uint) {
         uint bal1 = IBGTtoken.balanceOf(address(this));
         console.log("ibgt balance ", bal1);
@@ -211,18 +203,10 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
       redeem( _sharesAmount, receiver, owner);
       
     }
-
-    // backward
     function withdrawStakedtokenInfra(uint256 _amount) public {
         Vault.withdraw(_amount);
-        console.log(
-            "withdraw LP tokens into the vault",
-            Vault.balanceOf(address(this))
-        );
     }
-
-    //backward
-    function withdrawLiquidityv3pool() public returns (uint, uint) {
+    function withdrawLiquidityv3pool() internal returns (uint, uint) {
         IKodiakVaultV1 lpvault = IKodiakVaultV1(LPvaultTokenAddress);
 
         uint liquidity = lpvault.balanceOf(address(this));
@@ -250,8 +234,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         console.log("Liquidity withdrawn from the pool", liquidityBurned);
         return (amount0, amount1);
     }
-    // Sell ibgt to WBERA
-    function sell_ibgt_For_wbera(uint ibgtamount) public returns (uint) {
+    function sell_ibgt_For_wbera(uint ibgtamount) internal returns (uint) {
         IBGTtoken.approve(address(KodiakSwapV3), ibgtamount);
         uint deadline = block.timestamp + 1000;
         ISwapRouter.ExactInputSingleParams memory swapParams = ISwapRouter
@@ -271,9 +254,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         console.log("WBERA bought", amountOut);
         return amountOut;
     }
-
-    // backward
-    function sell_wbera_For_LBGT(uint _amount) public returns (uint) {
+    function sell_wbera_For_LBGT(uint _amount) internal returns (uint) {
         WBERAtoken.approve(address(BurbearRouter), _amount);
         uint deadline = block.timestamp + 1000;
 
@@ -297,7 +278,6 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         console.log("Lgbt bought", amountOut);
         return amountOut;
     }
-
     function _withdraw(address caller, address receiver, address owner, uint256 assets, uint256 shares) internal override {
         if (caller != owner) {
             _spendAllowance(owner, caller, shares);
@@ -316,19 +296,10 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
 
         emit Withdraw(caller, receiver, owner, assets, shares);
     }
-
-    // overrriding the deposit function of the vault
-    function _deposit(
-        address caller,
-        address receiver,
-        uint256 assets,
-        uint256 shares
-    ) internal override {
+    function _deposit(address caller, address receiver, uint256 assets, uint256 shares) internal override {
         _mint(receiver, shares);
         emit Deposit(caller, receiver, assets, shares);
     }
-
-    // over riding the totalAsset function of the vault
     function totalAssets() public view override returns (uint256) {
         // checking the balance of the vault
         return Vault.balanceOf(address(this));
