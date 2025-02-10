@@ -30,8 +30,10 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
     IERC20 public LBGTtoken = IERC20(LBGTTokenAddress);
     IERC20 public WBERAtoken = IERC20(WBERATokenAddress);
     IERC20 public IBGTtoken = IERC20(IBGTTokenAddress);
+    
     IERC20 public Lpvault = IERC20(LPvaultTokenAddress);
     IRouter public BurbearRouter = IRouter(BurbearRouterAddress);
+
     IStaking public Vault = IStaking(InfraredVault);
 
     constructor(address _lp, string memory _name, string memory _symbol) ERC4626(ERC20(_lp)) ERC20(_name, _symbol) OwnableNew(msg.sender) {}
@@ -48,7 +50,8 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         uint Ibgtamount = buyIBGTfromWBERAkodiak(_amountWBERAtokentosell);
         // add liquidity to the v3 pool
         uint AmountWBERAtoken = WBERAtoken.balanceOf(address(this));
-
+        console.log(AmountWBERAtoken, "WBERA balance");
+        console.log(Ibgtamount, "IBGT balance");
         addLiquidityv3pool(Ibgtamount, AmountWBERAtoken);
 
         uint LBGTtokenBal = IERC20(LPvaultTokenAddress).balanceOf(
@@ -102,7 +105,7 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
         return amountOut;
     }
 
-    function buyIBGTfromWBERAkodiak(uint wbearamount) public returns (uint) {
+    function buyIBGTfromWBERAkodiak(uint wbearamount) internal returns (uint) {
         uint _amount = wbearamount / 2; // using half of the WBERA to buy IBGT
         console.log(_amount, "WBERA balance");
         // approve KodiakSwapV3 to spend WBERA
@@ -229,8 +232,8 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
                 1,
                 address(this)
             );
-        console.log("Amount0", amount0);
-        console.log("Amount1", amount1);
+        console.log("ibgt amount", amount0);
+        console.log("wbera amount", amount1);
         console.log("Liquidity withdrawn from the pool", liquidityBurned);
         return (amount0, amount1);
     }
@@ -283,17 +286,13 @@ contract AutoCompoundingVault is ERC4626, OwnableNew {
             _spendAllowance(owner, caller, shares);
         }
         _burn(owner, shares);
-        // withdraw  everything from the vault 
         Vault.exit();
-        // send LBGT token to user
-        uint _amount = IBGTtoken.balanceOf(address(this));
-        // rewards in ibgt token so convert into wbera
-        uint wberaAmount = sell_ibgt_For_wbera(_amount);
-        // wbera to lbgt 
-        uint LBGTamount = sell_wbera_For_LBGT(wberaAmount);
-        // finally transferring back to user 
+        withdrawLiquidityv3pool();
+        uint _amount = IBGTtoken.balanceOf(address(this)); 
+        sell_ibgt_For_wbera(_amount);
+        uint _amountWBERA = WBERAtoken.balanceOf(address(this));  
+        uint LBGTamount = sell_wbera_For_LBGT(_amountWBERA);
         LBGTtoken.transfer(msg.sender, LBGTamount);
-
         emit Withdraw(caller, receiver, owner, assets, shares);
     }
     function _deposit(address caller, address receiver, uint256 assets, uint256 shares) internal override {

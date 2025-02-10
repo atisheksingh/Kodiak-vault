@@ -15,7 +15,7 @@ describe("TokenVault", function () {
         const lptoken = await ethers.getContractAt("contracts/utils/IERC20.sol:IERC20", LPvaultTokenAddress);
 
         // add impersonate account 
-        const impersonatedAccount = "0xbf71f63a2f5804B70Aaa4880a641A45fbd5989a2"
+        const impersonatedAccount = "0xbf71f63a2f5804B70Aaa4880a641A45fbd5989a2"//"0xbf71f63a2f5804B70Aaa4880a641A45fbd5989a2"
         // "0xCe8D4e158981c4BB9B830FD729E415B5F7b666aF";
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
@@ -58,10 +58,17 @@ describe("TokenVault", function () {
         // if the token have increament value mean the rewards are added in out contract . 
         // await tokenVault.connect(impersonatedSigner).Get_rewards();
 
-        await tokenVault.connect(impersonatedSigner).LBGTWithdraw();
+        const valueOfLp =        await tokenVault.connect(impersonatedSigner).balanceOf(impersonatedSigner);
+        console.log(valueOfLp.toString(), "Value of LP token in the account");
+
+        // await tokenVault.connect(impersonatedSigner).ReinvestReawardInfra()
+
+
+
+        await tokenVault.connect(impersonatedSigner).LBGTWithdraw(valueOfLp, impersonatedSigner, impersonatedSigner)
 
         const LbgtTokenBalanceafterReinvest = await LbgToken.balanceOf(impersonatedSigner.address);
-        console.log(LbgtTokenBalanceafterReinvest, "After reinvesting the rewards");
+        console.log(LbgtTokenBalanceafterReinvest, "After withdraw the rewards");
 
 
 
